@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+google-generativeai
+chromadb
+beautifulsoup4
+httpx
+pymupdf
+fpdf2
+python-dotenv
+langchain
+langchain-google-genai

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG AI Chatbot — AI Knowledge Assistant</title>
+    <meta
+      name="description"
+      content="An AI-powered knowledge chatbot using Retrieval-Augmented Generation (RAG) with Gemini and ChromaDB. Ask questions about LLMs, Transformers, Prompt Engineering, and more."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Clean minimal background -->
+    <div class="bg-base" aria-hidden="true"></div>
+
+    <!-- ── App shell ──────────────────────────────────── -->
+    <div class="app-shell">
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <div class="logo-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="14" stroke="url(#logoGrad)" stroke-width="2"/>
+                <path d="M10 16h12M16 10v12" stroke="url(#logoGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="logoGrad" x1="2" y1="2" x2="30" y2="30">
+                    <stop offset="0%" stop-color="#818cf8"/>
+                    <stop offset="100%" stop-color="#34d399"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <span class="logo-text">RAG<span class="logo-accent">AI</span></span>
+          </div>
+        </div>
+
+        <div class="sidebar-status">
+          <div class="status-card" id="statusCard">
+            <div class="status-dot" id="statusDot"></div>
+            <span class="status-label" id="statusLabel">Checking backend…</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-actions">
+          <button class="action-btn" id="ingestBtn" title="Re-run ingestion pipeline">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v10M6 9l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="15" width="14" height="2" rx="1" fill="currentColor" opacity=".4"/></svg>
+            Ingest Knowledge
+          </button>
+          <button class="action-btn" id="clearBtn" title="Clear chat history">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M6 5l8 10M14 5L6 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Clear Chat
+          </button>
+        </nav>
+
+        <div class="sidebar-topics">
+          <p class="topics-label">Try asking about</p>
+          <div class="topic-chips">
+            <button class="chip" data-query="What is Retrieval-Augmented Generation?">RAG</button>
+            <button class="chip" data-query="How does the Transformer architecture work?">Transformers</button>
+            <button class="chip" data-query="What are large language models?">LLMs</button>
+            <button class="chip" data-query="Explain prompt engineering techniques">Prompt Engineering</button>
+            <button class="chip" data-query="What are vector databases and how do they work?">Vector DBs</button>
+            <button class="chip" data-query="What are AI Agents and how do they work?">AI Agents</button>
+          </div>
+        </div>
+
+        <div class="sidebar-spacer" style="flex: 1;"></div>
+      </aside>
+
+      <!-- Main chat panel -->
+      <main class="chat-panel">
+        <!-- Header bar -->
+        <header class="chat-header">
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="chat-header-title">
+            <h1>AI Knowledge Assistant</h1>
+          </div>
+          <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">
+              <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px; display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Message list -->
+        <div class="messages-container" id="messagesContainer" role="log" aria-live="polite">
+          <!-- Welcome card -->
+          <div class="welcome-card" id="welcomeCard">
+            <div class="welcome-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="30" stroke="url(#wGrad)" stroke-width="2"/>
+                <path d="M22 32h20M32 22v20" stroke="url(#wGrad)" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="32" cy="32" r="6" fill="url(#wGrad)" opacity=".2"/>
+                <defs>
+                  <linearGradient id="wGrad" x1="2" y1="2" x2="62" y2="62">
+                    <stop stop-color="#818cf8"/>
+                    <stop offset="1" stop-color="#34d399"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <h2>Ask me anything about AI</h2>
+            <p>
+              I'm grounded in a knowledge base covering <strong>LLMs</strong>,
+              <strong>RAG</strong>, <strong>Transformers</strong>,
+              <strong>Prompt Engineering</strong>, <strong>Vector Databases</strong>,
+              and <strong>AI Agents</strong>. Choose a topic from the sidebar or type your question below.
+            </p>
+          </div>
+        </div>
+
+        <!-- Input area -->
+        <div class="input-area">
+          <div class="input-wrapper">
+            <textarea
+              id="queryInput"
+              class="query-input"
+              placeholder="Ask a question about AI…"
+              rows="1"
+              aria-label="Your question"
+              maxlength="2000"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+              <svg viewBox="0 0 20 20" fill="none">
+                <path d="M4 10l12-7-4.5 7 4.5 7L4 10z" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <p class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Ingest progress overlay -->
+    <div class="ingest-overlay" id="ingestOverlay" hidden>
+      <div class="ingest-modal">
+        <div class="ingest-spinner" aria-hidden="true"></div>
+        <h3>Ingesting Knowledge Base</h3>
+        <p id="ingestStatus">Loading PDF and scraping blog articles…</p>
+        <div class="ingest-progress-bar"><div class="ingest-progress-fill" id="ingestFill"></div></div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
